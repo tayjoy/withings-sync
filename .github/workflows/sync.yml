@@ -1,0 +1,27 @@
+name: Daily Withings Sync
+on:
+  schedule:
+    - cron: '0 12 * * *' # This runs every day at noon UTC
+  workflow_dispatch: # This adds a "Run" button so you can test it manually
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install withings-sync
+        run: pip install withings-sync
+
+      - name: Create Token File
+        run: echo '${{ secrets.WITHINGS_TOKENS }}' > .withings_user.json
+
+      - name: Run Sync
+        env:
+          GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+        run: |
+          withings-sync --gu "$GARMIN_USERNAME" --gp "$GARMIN_PASSWORD"
