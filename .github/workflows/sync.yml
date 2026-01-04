@@ -1,33 +1,13 @@
-name: Daily Withings Sync
-on:
-  schedule:
-    - cron: '0 12 * * *'
-  workflow_dispatch:
-
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install withings-sync
-        run: pip install withings-sync
-
-      - name: Create Token File
+- name: Create Token File
         run: |
-          echo '${{ secrets.WITHINGS_TOKENS }}' > .withings_user.json
-          chmod 600 .withings_user.json
+          # This creates the file in the hidden home directory where the script looks by default
+          echo '${{ secrets.WITHINGS_TOKENS }}' > /home/runner/.withings_user.json
+          chmod 600 /home/runner/.withings_user.json
 
       - name: Run Sync
         env:
           GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
           GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
-        # The "--config-folder ." below is the most important part!
         run: |
-          withings-sync --config-folder . --gu "$GARMIN_USERNAME" --gp "$GARMIN_PASSWORD"
+          # We removed the --config-folder part since we moved the file to the default location
+          withings-sync --gu "$GARMIN_USERNAME" --gp "$GARMIN_PASSWORD"
