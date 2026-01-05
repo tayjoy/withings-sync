@@ -34,16 +34,10 @@ jobs:
     - name: Create config directory
       run: mkdir -p $HOME/.config/withings-sync
     
-    - name: Restore Withings tokens
+    - name: Restore Withings token
       run: |
-        echo '${{ secrets.WITHINGS_TOKENS }}' > $HOME/.withings_user.json
+        echo '${{ secrets.WITHINGS_TOKEN }}' > $HOME/.withings_user.json
         chmod 600 $HOME/.withings_user.json
-    
-    - name: Restore Garmin session (if exists)
-      if: ${{ secrets.GARMIN_SESSION != '' }}
-      run: |
-        echo '${{ secrets.GARMIN_SESSION }}' > $HOME/.garmin_session
-        chmod 600 $HOME/.garmin_session
     
     - name: Run sync
       env:
@@ -51,14 +45,6 @@ jobs:
         GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
       run: |
         poetry run withings-sync --verbose
-    
-    - name: Save Garmin session for next run
-      if: always()
-      run: |
-        if [ -f "$HOME/.garmin_session" ]; then
-          echo "GARMIN_SESSION=$(cat $HOME/.garmin_session)" >> $GITHUB_ENV
-          echo "✅ Garmin session saved"
-        fi
     
     # Optional: Upload logs if sync fails
     - name: Upload logs on failure
